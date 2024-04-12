@@ -59,6 +59,13 @@ final class FeatureAViewController: UIViewController {
 		button.center = view.center
 		view.addSubview(button)
 
+		Task.detached { [weak self] in
+			await self?.setupObserve()
+		}
+	}
+
+	@MainActor
+	private func setupObserve() {
 		var featureBVC: FeatureBViewController?
 		observe { [weak self] in
 			guard let self else { return }

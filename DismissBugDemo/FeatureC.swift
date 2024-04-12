@@ -45,7 +45,9 @@ final class FeatureCViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		view.backgroundColor = .yellow
-		store.send(.viewDidLoad)
+		Task.detached { [weak self] in
+			await self?.sendViewDidLoadAction()
+		}
 
 		let closeButton = UIButton(type: .system)
 		closeButton.setTitle("Close", for: .normal)
@@ -53,6 +55,11 @@ final class FeatureCViewController: UIViewController {
 		closeButton.frame = CGRect(x: 0, y: 0, width: 200, height: 50)
 		closeButton.center = view.center
 		view.addSubview(closeButton)
+	}
+
+	@MainActor
+	private func sendViewDidLoadAction() {
+		store.send(.viewDidLoad)
 	}
 
 	@objc func closeButtonTapped() {
