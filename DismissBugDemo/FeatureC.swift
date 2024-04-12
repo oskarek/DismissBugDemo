@@ -10,7 +10,7 @@ struct FeatureC: Reducer {
 
 	enum Action {
 		case closeButtonTapped
-		case viewDidLoad
+		case viewWillInitiallyAppear
 	}
 
 	@Dependency(\.dismiss) var dismiss
@@ -20,7 +20,7 @@ struct FeatureC: Reducer {
 			switch action {
 			case .closeButtonTapped:
 				return .run { _ in await dismiss() }
-			case .viewDidLoad:
+			case .viewWillInitiallyAppear:
 				return .none
 			}
 		}
@@ -45,9 +45,6 @@ final class FeatureCViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		view.backgroundColor = .yellow
-		Task.detached { [weak self] in
-			await self?.sendViewDidLoadAction()
-		}
 
 		let closeButton = UIButton(type: .system)
 		closeButton.setTitle("Close", for: .normal)
@@ -57,9 +54,12 @@ final class FeatureCViewController: UIViewController {
 		view.addSubview(closeButton)
 	}
 
-	@MainActor
-	private func sendViewDidLoadAction() {
-		store.send(.viewDidLoad)
+	var viewWillAppearCalled = false
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		guard !viewWillAppearCalled else { return }
+		viewWillAppearCalled = true
+		store.send(.viewWillInitiallyAppear)
 	}
 
 	@objc func closeButtonTapped() {

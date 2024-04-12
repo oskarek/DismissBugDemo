@@ -58,13 +58,16 @@ final class FeatureAViewController: UIViewController {
 		button.frame = CGRect(x: 0, y: 0, width: 200, height: 50)
 		button.center = view.center
 		view.addSubview(button)
-
-		Task.detached { [weak self] in
-			await self?.setupObserve()
-		}
 	}
 
-	@MainActor
+	var viewWillAppearCalled = false
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		guard !viewWillAppearCalled else { return }
+		viewWillAppearCalled = true
+		setupObserve()
+	}
+
 	private func setupObserve() {
 		var featureBVC: FeatureBViewController?
 		observe { [weak self] in
